@@ -1,0 +1,88 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Post {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  title: String!
+  content: String!
+  author: User
+  comments: [Comment!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Comment {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  content: String!
+  ref: Int!
+  step: Int!
+  level: Int!
+  count: Int!
+  parentId: Int!
+  author: User
+  post: Post
+}
+
+type User {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  password: String!
+  post: [Post!]
+  comments: [Comment!]
+}
+
+type JwtToken {
+  access: String!
+}
+
+type Query {
+  getPosts: [Post!]!
+  getComments(input: getCommentInput!): [Comment!]!
+}
+
+input getCommentInput {
+  postId: Int!
+}
+
+type Mutation {
+  signup(input: SignUpInput!): User!
+  login(input: LoginInput!): JwtToken!
+  createPost(input: CreatePostInput!): Post!
+  createComment(input: CreateCommentInput!): Comment!
+  createReply(input: createReplyInput!): Comment!
+}
+
+input SignUpInput {
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreatePostInput {
+  title: String!
+  content: String!
+}
+
+input CreateCommentInput {
+  content: String!
+  postId: Int!
+}
+
+input createReplyInput {
+  content: String!
+  id: Int
+}
