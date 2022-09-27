@@ -13,11 +13,7 @@ export class PostsResolver {
   constructor(private readonly postsService: PostsService) {}
 
   @Query(() => [Post])
-  getPosts(): Promise<
-    (Post & {
-      author: User;
-    })[]
-  > {
+  getPosts(): Promise<(Post & { author: User })[]> {
     return this.postsService.findAll();
   }
 
@@ -26,7 +22,7 @@ export class PostsResolver {
   createPost(
     @CurrentUser() { sub: authorId }: JwtPayload,
     @Args('input') input: CreatePostInput,
-  ): Promise<Post> {
+  ): Promise<Post & { author: User }> {
     return this.postsService.create(input, authorId);
   }
 }

@@ -13,11 +13,9 @@ export class CommentsResolver {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Query(() => [Comment])
-  getComments(@Args('input') input: getCommentInput): Promise<
-    (Comment & {
-      author: User;
-    })[]
-  > {
+  getComments(
+    @Args('input') input: getCommentInput,
+  ): Promise<(Comment & { author: User })[]> {
     return this.commentsService.findAllByPostId(input.postId);
   }
 
@@ -26,7 +24,7 @@ export class CommentsResolver {
   createComment(
     @CurrentUser() { sub: UserId }: JwtPayload,
     @Args('input') input: CreateCommentInput,
-  ): Promise<Comment> {
+  ): Promise<Comment & { author: User }> {
     return this.commentsService.comment(input, UserId);
   }
 
@@ -35,7 +33,7 @@ export class CommentsResolver {
   createReply(
     @CurrentUser() { sub: UserId }: JwtPayload,
     @Args('input') input: createReplyInput,
-  ): Promise<Comment> {
+  ): Promise<Comment & { author: User }> {
     return this.commentsService.reply(input, UserId);
   }
 }

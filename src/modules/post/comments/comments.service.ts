@@ -3,12 +3,13 @@ import { PrismaService } from '@providers/prisma/prisma.service';
 import { User } from '@modules/user/users/models';
 import { CreateCommentInput, createReplyInput } from './dtos';
 import { Comment } from './models';
+import { Post } from '../posts/models';
 
 @Injectable()
 export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOneById(id: number): Promise<Comment> {
+  async findOneById(id: number): Promise<Comment & { post: Post }> {
     return await this.prisma.comment.findFirst({
       where: { id },
       include: { post: true },
@@ -19,11 +20,9 @@ export class CommentsService {
     return await this.prisma.comment.findFirst({ orderBy: { ref: 'desc' } });
   }
 
-  async findAllByPostId(postId: number): Promise<
-    (Comment & {
-      author: User;
-    })[]
-  > {
+  async findAllByPostId(
+    postId: number,
+  ): Promise<(Comment & { author: User })[]> {
     return await this.prisma.comment.findMany({
       where: { postId },
       orderBy: [{ ref: 'desc' }, { step: 'asc' }],
@@ -31,7 +30,10 @@ export class CommentsService {
     });
   }
 
-  async comment(input: CreateCommentInput, authorId: number): Promise<Comment> {
+  async comment(
+    input: CreateCommentInput,
+    authorId: number,
+  ): Promise<Comment & { author: User }> {
     const lastRef = await this.findOneOrderByRef();
     const data = { ...input, authorId };
 
@@ -45,14 +47,17 @@ export class CommentsService {
     });
   }
 
-  async reply(input: createReplyInput, authorId: number): Promise<Comment> {
+  async reply(
+    input: createReplyInput,
+    authorId: number,
+  ): Promise<Comment & { author: User }> {
     const parentComment = await this.findOneById(input.id);
-    const count =
+    const count: number =
       (await this.countReply(parentComment.id)) + parentComment.count;
-    const maxLevel =
+    const maxLevel: number =
       (await this.getLevel(parentComment.id, parentComment.level)) +
       parentComment.level;
-    const level = parentComment.level;
+    const level: number = parentComment.level;
     let step: number;
 
     if (level < maxLevel) {
@@ -86,13 +91,13 @@ export class CommentsService {
     });
   }
 
-  async countReply(parentId: number) {
+  async countReply(parentId: number): Promise<number> {
     const replys = await this.prisma.comment.findMany({ where: { parentId } });
     if (!replys) {
       return 0;
     }
 
-    return replys.reduce(async (count: any, reply) => {
+    return replys.reduce(async (count: any, reply: Comment) => {
       if (reply.count > 0) {
         return count + reply.count + (await this.countReply(reply.id));
       }
@@ -100,14 +105,14 @@ export class CommentsService {
     }, 0);
   }
 
-  async getLevel(parentId: number, level: number) {
+  async getLevel(parentId: number, level: number): Promise<number> {
     const replys = await this.prisma.comment.findMany({
       where: { parentId, count: { gt: 1 } },
     });
     if (!replys) {
       return level;
     }
-    return replys.reduce(async (a: any, c) => {
+    return replys.reduce(async (_a: any, c: Comment) => {
       if (c.level > level) {
         return await this.getLevel(c.id, c.level);
       }
@@ -115,7 +120,7 @@ export class CommentsService {
     }, level);
   }
 
-  async increaseStep(ref: number, gte: number) {
+  async increaseStep(ref: number, gte: number): Promise<void> {
     await this.prisma.comment.updateMany({
       where: { ref, step: { gte } },
       data: { step: { increment: 1 } },

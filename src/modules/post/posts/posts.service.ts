@@ -7,17 +7,16 @@ import { CreatePostInput } from './dtos';
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
-  async findAll(): Promise<
-    (Post & {
-      author: User;
-    })[]
-  > {
+  async findAll(): Promise<(Post & { author: User })[]> {
     return await this.prisma.post.findMany({
       include: { author: true },
     });
   }
 
-  async create(input: CreatePostInput, authorId: number): Promise<Post> {
+  async create(
+    input: CreatePostInput,
+    authorId: number,
+  ): Promise<Post & { author: User }> {
     return await this.prisma.post.create({
       data: { ...input, authorId },
       include: { author: true },
