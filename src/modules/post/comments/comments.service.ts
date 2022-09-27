@@ -30,6 +30,10 @@ export class CommentsService {
     });
   }
 
+  async findAllByRef(ref: number): Promise<Comment[]> {
+    return await this.prisma.comment.findMany({ where: { ref } });
+  }
+
   async comment(
     input: CreateCommentInput,
     authorId: number,
@@ -52,12 +56,16 @@ export class CommentsService {
     authorId: number,
   ): Promise<Comment & { author: User }> {
     const parentComment = await this.findOneById(input.id);
-    const count: number =
-      (await this.countReply(parentComment.id)) + parentComment.count;
-    const maxLevel: number =
-      (await this.getLevel(parentComment.id, parentComment.level)) +
-      parentComment.level;
-    const level: number = parentComment.level;
+    const refGroup = await this.findAllByRef(parentComment.ref);
+    const count =
+      this.countReply(parentComment.id, refGroup) + parentComment.count;
+    const maxLevel = this.getLevel(
+      parentComment.id,
+      parentComment.level,
+      refGroup,
+    );
+
+    const level: number = parentComment.level + 1;
     let step: number;
 
     if (level < maxLevel) {
@@ -91,32 +99,29 @@ export class CommentsService {
     });
   }
 
-  async countReply(parentId: number): Promise<number> {
-    const replys = await this.prisma.comment.findMany({ where: { parentId } });
-    if (!replys) {
-      return 0;
-    }
+  countReply(parentId: number, comments: Comment[]): number {
+    const refGroup = comments.filter(
+      (comment) => comment.parentId === parentId && comment.count > 0,
+    );
+    if (refGroup.length === 0) return 0;
 
-    return replys.reduce(async (count: any, reply: Comment) => {
-      if (reply.count > 0) {
-        return count + reply.count + (await this.countReply(reply.id));
-      }
-      return count + reply.count;
+    return refGroup.reduce((count: number, comment: Comment) => {
+      return comment.count > 0
+        ? count + comment.count + this.countReply(comment.id, comments)
+        : count + comment.count;
     }, 0);
   }
 
-  async getLevel(parentId: number, level: number): Promise<number> {
-    const replys = await this.prisma.comment.findMany({
-      where: { parentId, count: { gt: 1 } },
-    });
-    if (!replys) {
-      return level;
-    }
-    return replys.reduce(async (_a: any, c: Comment) => {
-      if (c.level > level) {
-        return await this.getLevel(c.id, c.level);
-      }
-      return c.level;
+  getLevel(parentId: number, level: number, comments: Comment[]): number {
+    const refGroup = comments.filter(
+      (comment) => comment.parentId === parentId,
+    );
+    if (refGroup.length === 0) return level;
+
+    return refGroup.reduce((maxLevel: number, comment: Comment) => {
+      return maxLevel > this.getLevel(comment.id, comment.level, comments)
+        ? maxLevel
+        : this.getLevel(comment.id, comment.level, comments);
     }, level);
   }
 
