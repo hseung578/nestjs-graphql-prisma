@@ -39,11 +39,7 @@ export class CommentsService {
     authorId: number,
   ): Promise<Comment & { author: User }> {
     const lastRef = await this.findOneOrderByRef();
-    const data = { ...input, authorId };
-
-    if (lastRef) {
-      data['ref'] = lastRef.ref + 1;
-    }
+    const data = { ...input, authorId, ref: lastRef ? lastRef.ref + 1 : null };
 
     return await this.prisma.comment.create({
       data,
