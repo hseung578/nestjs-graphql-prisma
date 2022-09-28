@@ -57,14 +57,16 @@ export class CommentsService {
   ): Promise<Comment & { author: User }> {
     const parentComment = await this.findOneById(input.id);
     const refGroup = await this.findAllByRef(parentComment.ref);
-    const count =
-      this.countReply(parentComment.id, refGroup) + parentComment.count;
-    const maxLevel = this.getLevel(
+    const count = this.countReply(
+      parentComment.id,
+      parentComment.count,
+      refGroup,
+    );
+    const maxLevel = this.getMaxLevel(
       parentComment.id,
       parentComment.level,
       refGroup,
     );
-
     const level: number = parentComment.level + 1;
     let step: number;
 
@@ -99,29 +101,35 @@ export class CommentsService {
     });
   }
 
-  countReply(parentId: number, comments: Comment[]): number {
+  countReply(parentId: number, count: number, comments: Comment[]): number {
     const refGroup = comments.filter(
-      (comment) => comment.parentId === parentId && comment.count > 0,
+      (comment) => comment.parentId === parentId && comment.count !== 0,
     );
-    if (refGroup.length === 0) return 0;
+    const filtered = comments.filter(
+      (comment) => comment.parentId !== parentId && comment.count !== 0,
+    );
+    if (refGroup.length === 0) return count;
 
-    return refGroup.reduce((count: number, comment: Comment) => {
-      return comment.count > 0
-        ? count + comment.count + this.countReply(comment.id, comments)
-        : count + comment.count;
-    }, 0);
+    return refGroup.reduce(
+      (sum: number, comment: Comment) =>
+        sum + this.countReply(comment.id, comment.count, filtered),
+      count,
+    );
   }
 
-  getLevel(parentId: number, level: number, comments: Comment[]): number {
+  getMaxLevel(parentId: number, level: number, comments: Comment[]): number {
     const refGroup = comments.filter(
       (comment) => comment.parentId === parentId,
+    );
+    const filtered = comments.filter(
+      (comment) => comment.parentId !== parentId,
     );
     if (refGroup.length === 0) return level;
 
     return refGroup.reduce((maxLevel: number, comment: Comment) => {
-      return maxLevel > this.getLevel(comment.id, comment.level, comments)
+      return maxLevel > this.getMaxLevel(comment.id, comment.level, filtered)
         ? maxLevel
-        : this.getLevel(comment.id, comment.level, comments);
+        : this.getMaxLevel(comment.id, comment.level, filtered);
     }, level);
   }
 
