@@ -1,3 +1,3 @@
-export * from './createComment.input';
-export * from './createReply.input';
-export * from './getComment.input';
+export * from './create-comment.input';
+export * from './create-reply.input';
+export * from './get-comment.input';

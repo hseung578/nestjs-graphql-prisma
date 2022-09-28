@@ -1,12 +1,13 @@
 import { Field, InputType, Int, PickType } from '@nestjs/graphql';
-import { IsInt } from 'class-validator';
-import { CreateCommentInput } from './createComment.input';
+import { IsInt, IsNotEmpty } from 'class-validator';
+import { CreateCommentInput } from './create-comment.input';
 
 @InputType()
 export class createReplyInput extends PickType(CreateCommentInput, [
   'content',
 ] as const) {
+  @IsNotEmpty()
   @IsInt()
-  @Field(() => Int, { nullable: true })
+  @Field(() => Int)
   id: number;
 }

@@ -8,6 +8,7 @@ export class CreateCommentInput {
   @Field()
   content: string;
 
+  @IsNotEmpty()
   @IsInt()
   @Field(() => Int)
   postId: number;
