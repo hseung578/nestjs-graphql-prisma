@@ -22,4 +22,8 @@ export class PostsService {
       include: { author: true },
     });
   }
+
+  async delete(id: number): Promise<Post> {
+    return await this.prisma.post.delete({ where: { id } });
+  }
 }

@@ -5,7 +5,7 @@ import { CurrentUser } from '@auth/decorators';
 import { JwtPayload } from '@auth/interfaces';
 import { User } from '@modules/user/users/models';
 import { Post } from './models';
-import { CreatePostInput } from './dtos';
+import { CreatePostInput, DeletePostInput } from './dtos';
 import { PostsService } from './posts.service';
 
 @Resolver()
@@ -24,5 +24,11 @@ export class PostsResolver {
     @Args('input') input: CreatePostInput,
   ): Promise<Post & { author: User }> {
     return this.postsService.create(input, authorId);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Mutation(() => Post)
+  deletePost(@Args('input') input: DeletePostInput): Promise<Post> {
+    return this.postsService.delete(input.id);
   }
 }
