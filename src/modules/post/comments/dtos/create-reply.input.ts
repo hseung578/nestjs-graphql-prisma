@@ -3,7 +3,7 @@ import { IsInt, IsNotEmpty } from 'class-validator';
 import { CreateCommentInput } from './create-comment.input';
 
 @InputType()
-export class createReplyInput extends PickType(CreateCommentInput, [
+export class CreateReplyInput extends PickType(CreateCommentInput, [
   'content',
 ] as const) {
   @IsNotEmpty()

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@providers/prisma/prisma.service';
 import { User } from '@modules/user/users/models';
-import { CreateCommentInput, createReplyInput } from './dtos';
+import { CreateCommentInput, CreateReplyInput } from './dtos';
 import { Comment } from './models';
 import { Post } from '../posts/models';
 
@@ -39,7 +39,7 @@ export class CommentsService {
     authorId: number,
   ): Promise<Comment & { author: User }> {
     const lastRef = await this.findOneOrderByRef();
-    const data = { ...input, authorId, ref: lastRef ? lastRef.ref + 1 : null };
+    const data = { ...input, authorId, ref: lastRef ? lastRef.ref + 1 : 1 };
 
     return await this.prisma.comment.create({
       data,
@@ -48,7 +48,7 @@ export class CommentsService {
   }
 
   async reply(
-    input: createReplyInput,
+    input: CreateReplyInput,
     authorId: number,
   ): Promise<Comment & { author: User }> {
     const parentComment = await this.findOneById(input.id);
@@ -95,6 +95,10 @@ export class CommentsService {
       data,
       include: { author: true },
     });
+  }
+
+  async delete(id: number): Promise<Comment> {
+    return await this.prisma.comment.delete({ where: { id } });
   }
 
   countReply(parentId: number, count: number, comments: Comment[]): number {

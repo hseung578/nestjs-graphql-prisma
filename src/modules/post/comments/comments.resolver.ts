@@ -4,7 +4,12 @@ import { JwtAccessGuard } from '@auth/guards';
 import { CommentsService } from './comments.service';
 import { CurrentUser } from '@auth/decorators';
 import { JwtPayload } from '@auth/interfaces';
-import { CreateCommentInput, createReplyInput, getCommentInput } from './dtos';
+import {
+  CreateCommentInput,
+  CreateReplyInput,
+  DeleteCommentInput,
+  GetCommentInput,
+} from './dtos';
 import { Comment } from './models';
 import { User } from '@modules/user/users/models';
 
@@ -14,7 +19,7 @@ export class CommentsResolver {
 
   @Query(() => [Comment])
   getComments(
-    @Args('input') input: getCommentInput,
+    @Args('input') input: GetCommentInput,
   ): Promise<(Comment & { author: User })[]> {
     return this.commentsService.findAllByPostId(input.postId);
   }
@@ -32,8 +37,14 @@ export class CommentsResolver {
   @Mutation(() => Comment)
   createReply(
     @CurrentUser() { sub: UserId }: JwtPayload,
-    @Args('input') input: createReplyInput,
+    @Args('input') input: CreateReplyInput,
   ): Promise<Comment & { author: User }> {
     return this.commentsService.reply(input, UserId);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Mutation(() => Comment)
+  deleteComment(@Args('input') input: DeleteCommentInput): Promise<Comment> {
+    return this.commentsService.delete(input.id);
   }
 }

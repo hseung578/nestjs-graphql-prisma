@@ -27,6 +27,7 @@ type Comment {
   level: Int!
   count: Int!
   parentId: Int!
+  deletedAt: DateTime!
   author: User
   post: Post
 }
@@ -47,10 +48,10 @@ type JwtToken {
 
 type Query {
   getPosts: [Post!]!
-  getComments(input: getCommentInput!): [Comment!]!
+  getComments(input: GetCommentInput!): [Comment!]!
 }
 
-input getCommentInput {
+input GetCommentInput {
   postId: Int!
 }
 
@@ -60,7 +61,8 @@ type Mutation {
   createPost(input: CreatePostInput!): Post!
   deletePost(input: DeletePostInput!): Post!
   createComment(input: CreateCommentInput!): Comment!
-  createReply(input: createReplyInput!): Comment!
+  createReply(input: CreateReplyInput!): Comment!
+  deleteComment(input: DeleteCommentInput!): Comment!
 }
 
 input SignUpInput {
@@ -87,7 +89,11 @@ input CreateCommentInput {
   postId: Int!
 }
 
-input createReplyInput {
+input CreateReplyInput {
   content: String!
-  id: Int
+  id: Int!
+}
+
+input DeleteCommentInput {
+  id: Int!
 }

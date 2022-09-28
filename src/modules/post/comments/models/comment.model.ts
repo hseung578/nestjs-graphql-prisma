@@ -24,6 +24,9 @@ export class Comment extends BaseModel {
   @Field(() => Int, { defaultValue: 0 })
   parentId: number;
 
+  @Field()
+  deletedAt: Date;
+
   @Field(() => User, { nullable: true })
   author?: User;
 
