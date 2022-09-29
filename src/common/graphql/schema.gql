@@ -59,7 +59,8 @@ type Mutation {
   signup(input: SignUpInput!): User!
   login(input: LoginInput!): JwtToken!
   createPost(input: CreatePostInput!): Post!
-  deletePost(input: DeletePostInput!): Post!
+  updatePost(input: UpdatePostInput!): Boolean!
+  deletePost(input: DeletePostInput!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
   createReply(input: CreateReplyInput!): Comment!
   deleteComment(input: DeleteCommentInput!): Comment!
@@ -78,6 +79,12 @@ input LoginInput {
 input CreatePostInput {
   title: String!
   content: String!
+}
+
+input UpdatePostInput {
+  id: Int!
+  title: String
+  content: String
 }
 
 input DeletePostInput {

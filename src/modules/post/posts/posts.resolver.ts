@@ -5,7 +5,7 @@ import { CurrentUser } from '@auth/decorators';
 import { JwtPayload } from '@auth/interfaces';
 import { User } from '@modules/user/users/models';
 import { Post } from './models';
-import { CreatePostInput, DeletePostInput } from './dtos';
+import { CreatePostInput, DeletePostInput, UpdatePostInput } from './dtos';
 import { PostsService } from './posts.service';
 
 @Resolver()
@@ -27,8 +27,22 @@ export class PostsResolver {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Mutation(() => Post)
-  deletePost(@Args('input') input: DeletePostInput): Promise<Post> {
-    return this.postsService.delete(input.id);
+  @Mutation(() => Boolean)
+  async updatePost(
+    @CurrentUser() { sub: authorId }: JwtPayload,
+    @Args('input') input: UpdatePostInput,
+  ): Promise<boolean> {
+    await this.postsService.update(input, authorId);
+    return true;
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Mutation(() => Boolean)
+  async deletePost(
+    @CurrentUser() { sub: authorId }: JwtPayload,
+    @Args('input') input: DeletePostInput,
+  ): Promise<boolean> {
+    await this.postsService.delete(input.id, authorId);
+    return true;
   }
 }
