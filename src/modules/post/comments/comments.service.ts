@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@providers/prisma/prisma.service';
 import { User } from '@modules/user/users/models';
-import { CreateCommentInput, CreateReplyInput } from './dtos';
+import {
+  CreateCommentInput,
+  CreateReplyInput,
+  UpdateCommentInput,
+} from './dtos';
 import { Comment } from './models';
 import { Post } from '../posts/models';
 
@@ -94,6 +98,13 @@ export class CommentsService {
     return await this.prisma.comment.create({
       data,
       include: { author: true },
+    });
+  }
+
+  async update(input: UpdateCommentInput): Promise<Comment> {
+    return await this.prisma.comment.update({
+      where: { id: input.id },
+      data: { ...input },
     });
   }
 

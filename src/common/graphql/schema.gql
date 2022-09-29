@@ -63,7 +63,8 @@ type Mutation {
   deletePost(input: DeletePostInput!): Boolean!
   createComment(input: CreateCommentInput!): Comment!
   createReply(input: CreateReplyInput!): Comment!
-  deleteComment(input: DeleteCommentInput!): Comment!
+  updateComment(input: UpdateCommentInput!): Boolean!
+  deleteComment(input: DeleteCommentInput!): Boolean!
 }
 
 input SignUpInput {
@@ -97,6 +98,11 @@ input CreateCommentInput {
 }
 
 input CreateReplyInput {
+  content: String!
+  id: Int!
+}
+
+input UpdateCommentInput {
   content: String!
   id: Int!
 }

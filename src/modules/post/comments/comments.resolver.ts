@@ -9,13 +9,18 @@ import {
   CreateReplyInput,
   DeleteCommentInput,
   GetCommentInput,
+  UpdateCommentInput,
 } from './dtos';
 import { Comment } from './models';
 import { User } from '@modules/user/users/models';
+import { PrismaService } from '@providers/prisma/prisma.service';
 
 @Resolver()
 export class CommentsResolver {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Query(() => [Comment])
   getComments(
@@ -43,8 +48,24 @@ export class CommentsResolver {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Mutation(() => Comment)
-  deleteComment(@Args('input') input: DeleteCommentInput): Promise<Comment> {
-    return this.commentsService.delete(input.id);
+  @Mutation(() => Boolean)
+  async updateComment(
+    @CurrentUser() { sub: authorId }: JwtPayload,
+    @Args('input') input: UpdateCommentInput,
+  ): Promise<boolean> {
+    await this.prisma.isMine('Comment', input.id, authorId);
+    await this.commentsService.update(input);
+    return true;
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Mutation(() => Boolean)
+  async deleteComment(
+    @CurrentUser() { sub: authorId }: JwtPayload,
+    @Args('input') input: DeleteCommentInput,
+  ): Promise<boolean> {
+    await this.prisma.isMine('Comment', input.id, authorId);
+    await this.commentsService.delete(input.id);
+    return true;
   }
 }
