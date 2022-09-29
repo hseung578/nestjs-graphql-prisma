@@ -23,16 +23,14 @@ export class PostsService {
     });
   }
 
-  async update(input: UpdatePostInput, authorId: number): Promise<Post> {
-    await this.prisma.isMine('Post', input.id, authorId);
+  async update(input: UpdatePostInput): Promise<Post> {
     return await this.prisma.post.update({
       where: { id: input.id },
       data: { ...input },
     });
   }
 
-  async delete(id: number, authorId: number): Promise<Post> {
-    await this.prisma.isMine('Post', id, authorId);
+  async delete(id: number): Promise<Post> {
     return await this.prisma.post.delete({ where: { id } });
   }
 }

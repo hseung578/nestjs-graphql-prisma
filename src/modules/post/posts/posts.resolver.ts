@@ -7,10 +7,14 @@ import { User } from '@modules/user/users/models';
 import { Post } from './models';
 import { CreatePostInput, DeletePostInput, UpdatePostInput } from './dtos';
 import { PostsService } from './posts.service';
+import { PrismaService } from '@providers/prisma/prisma.service';
 
 @Resolver()
 export class PostsResolver {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Query(() => [Post])
   getPosts(): Promise<(Post & { author: User })[]> {
@@ -32,7 +36,8 @@ export class PostsResolver {
     @CurrentUser() { sub: authorId }: JwtPayload,
     @Args('input') input: UpdatePostInput,
   ): Promise<boolean> {
-    await this.postsService.update(input, authorId);
+    await this.prisma.isMine('Post', input.id, authorId);
+    await this.postsService.update(input);
     return true;
   }
 
@@ -42,7 +47,8 @@ export class PostsResolver {
     @CurrentUser() { sub: authorId }: JwtPayload,
     @Args('input') input: DeletePostInput,
   ): Promise<boolean> {
-    await this.postsService.delete(input.id, authorId);
+    await this.prisma.isMine('Post', input.id, authorId);
+    await this.postsService.delete(input.id);
     return true;
   }
 }
