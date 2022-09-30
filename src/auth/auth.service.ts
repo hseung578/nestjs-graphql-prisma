@@ -26,17 +26,20 @@ export class AuthService {
     };
   }
 
-  setRefreshToken(user: Pick<User, 'id' | 'email'>, res: Response): void {
+  async setRefreshToken(
+    user: Pick<User, 'id' | 'email'>,
+    res: Response,
+  ): Promise<void> {
     const payload = {
       sub: user.id,
       email: user.email,
     };
 
-    const refreshToken = this.jwtService.signAsync(payload, {
+    const refreshToken = await this.jwtService.signAsync(payload, {
       secret: this.jwtConfigService.refreshKey,
       expiresIn: this.jwtConfigService.refreshExpire,
     });
 
-    res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
+    res.cookie('refresh', refreshToken, { path: '/' });
   }
 }

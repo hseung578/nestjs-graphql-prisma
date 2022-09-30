@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -10,8 +11,10 @@ import { AuthService } from './auth.service';
 import { UsersService } from '@modules/user/users/users.service';
 import { User } from '@modules/user/users/models';
 import { LoginInput, SignUpInput } from './dtos';
-import { AccessToken } from './interfaces';
+import { AccessToken, JwtPayload } from './interfaces';
 import { JwtToken } from './models';
+import { JwtRefreshGuard } from './guards';
+import { CurrentUser } from './decorators';
 
 @Resolver()
 export class AuthResolver {
@@ -44,8 +47,14 @@ export class AuthResolver {
       throw new UnauthorizedException();
     }
 
-    this.authService.setRefreshToken(user, context.req.res);
+    await this.authService.setRefreshToken(user, context.req.res);
 
     return this.authService.getAccessToken(user);
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Mutation(() => JwtToken)
+  recoverAccessToken(@CurrentUser() { sub: id, email }: JwtPayload) {
+    return this.authService.getAccessToken({ id, email });
   }
 }

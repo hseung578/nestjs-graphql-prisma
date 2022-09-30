@@ -15,11 +15,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       ]),
       ignoreExpiration: false,
       secretOrKey: jwtConfigService.refreshKey,
-      passReqToCallback: true,
+      // passReqToCallback: true,
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<JwtPayload> {
     return payload;
   }
 }

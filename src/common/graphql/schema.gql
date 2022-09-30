@@ -58,6 +58,7 @@ input GetCommentInput {
 type Mutation {
   signup(input: SignUpInput!): User!
   login(input: LoginInput!): JwtToken!
+  recoverAccessToken: JwtToken!
   createPost(input: CreatePostInput!): Post!
   updatePost(input: UpdatePostInput!): Boolean!
   deletePost(input: DeletePostInput!): Boolean!
