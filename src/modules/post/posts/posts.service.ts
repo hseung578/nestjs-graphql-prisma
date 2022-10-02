@@ -33,4 +33,8 @@ export class PostsService {
   async delete(id: number): Promise<Post> {
     return await this.prisma.post.delete({ where: { id } });
   }
+
+  async count(): Promise<number> {
+    return await this.prisma.post.count();
+  }
 }

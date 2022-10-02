@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAccessGuard } from '@auth/guards';
 import { CommentsService } from './comments.service';
@@ -67,5 +67,10 @@ export class CommentsResolver {
     await this.prisma.isMine('Comment', input.id, authorId);
     await this.commentsService.delete(input.id);
     return true;
+  }
+
+  @Mutation(() => Int)
+  count() {
+    return this.commentsService.count();
   }
 }

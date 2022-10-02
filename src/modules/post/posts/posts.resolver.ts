@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAccessGuard } from '@auth/guards';
 import { CurrentUser } from '@auth/decorators';
@@ -50,5 +50,10 @@ export class PostsResolver {
     await this.prisma.isMine('Post', input.id, authorId);
     await this.postsService.delete(input.id);
     return true;
+  }
+
+  @Mutation(() => Int)
+  count(): Promise<number> {
+    return this.postsService.count();
   }
 }

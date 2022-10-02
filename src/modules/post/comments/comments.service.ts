@@ -112,6 +112,10 @@ export class CommentsService {
     return await this.prisma.comment.delete({ where: { id } });
   }
 
+  async count(): Promise<number> {
+    return await this.prisma.comment.count();
+  }
+
   countReply(parentId: number, count: number, comments: Comment[]): number {
     const refGroup = comments.filter(
       (comment) => comment.parentId === parentId && comment.count !== 0,
