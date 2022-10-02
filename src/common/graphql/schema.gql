@@ -42,7 +42,7 @@ type User {
   comments: [Comment!]
 }
 
-type JwtToken {
+type AccessToken {
   access: String!
 }
 
@@ -57,8 +57,9 @@ input GetCommentInput {
 
 type Mutation {
   signup(input: SignUpInput!): User!
-  login(input: LoginInput!): JwtToken!
-  recoverAccessToken: JwtToken!
+  login(input: LoginInput!): AccessToken!
+  recoverAccessToken: AccessToken!
+  logout: Boolean!
   createPost(input: CreatePostInput!): Post!
   updatePost(input: UpdatePostInput!): Boolean!
   deletePost(input: DeletePostInput!): Boolean!

@@ -5,9 +5,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { JwtAccessStrategy, JwtRefreshStrategy } from './strategies';
+import { RedisModule } from '@providers/cache/redis';
 
 @Module({
-  imports: [JwtModule.register({}), UsersModule, JwtConfigModule],
+  imports: [JwtModule.register({}), UsersModule, JwtConfigModule, RedisModule],
   providers: [AuthResolver, AuthService, JwtAccessStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

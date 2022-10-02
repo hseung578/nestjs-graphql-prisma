@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtConfigService } from '@config/jwt';
-import { AccessToken } from './interfaces';
+import { JwtToken } from './interfaces';
 import { Response } from 'express';
 import { User } from '@modules/user/users/models';
+import { AccessToken } from './models';
 
 @Injectable()
 export class AuthService {
@@ -12,17 +13,19 @@ export class AuthService {
     private readonly jwtConfigService: JwtConfigService,
   ) {}
 
-  getAccessToken(user: Pick<User, 'id' | 'email'>): AccessToken {
+  async getAccessToken(user: Pick<User, 'id' | 'email'>): Promise<AccessToken> {
     const payload = {
       sub: user.id,
       email: user.email,
     };
 
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfigService.accessKey,
+      expiresIn: this.jwtConfigService.accessExpire,
+    });
+
     return {
-      access: this.jwtService.signAsync(payload, {
-        secret: this.jwtConfigService.accessKey,
-        expiresIn: this.jwtConfigService.accessExpire,
-      }),
+      access: accessToken,
     };
   }
 
@@ -41,5 +44,26 @@ export class AuthService {
     });
 
     res.cookie('refresh', refreshToken, { path: '/' });
+  }
+
+  async verify(accessToken: string, refreshToken: string): Promise<JwtToken> {
+    try {
+      const verifiedAccessToken = await this.jwtService.verifyAsync(
+        accessToken,
+        {
+          secret: this.jwtConfigService.accessKey,
+        },
+      );
+      const verifiedRefreshToken = await this.jwtService.verifyAsync(
+        refreshToken,
+        {
+          secret: this.jwtConfigService.refreshKey,
+        },
+      );
+
+      return { access: verifiedAccessToken, refresh: verifiedRefreshToken };
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }

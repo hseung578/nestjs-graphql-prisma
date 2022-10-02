@@ -1,2 +1,2 @@
 export * from './jwt-payload.interface';
-export * from './access-token.inferface';
+export * from './jwt-token.interface';

@@ -11,16 +11,18 @@ import { AuthService } from './auth.service';
 import { UsersService } from '@modules/user/users/users.service';
 import { User } from '@modules/user/users/models';
 import { LoginInput, SignUpInput } from './dtos';
-import { AccessToken, JwtPayload } from './interfaces';
-import { JwtToken } from './models';
-import { JwtRefreshGuard } from './guards';
+import { JwtPayload } from './interfaces';
+import { AccessToken } from './models';
+import { JwtAccessGuard, JwtRefreshGuard } from './guards';
 import { CurrentUser } from './decorators';
+import { RedisService } from '@providers/cache/redis/redis.service';
 
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
     private readonly userSerivce: UsersService,
+    private readonly redisService: RedisService,
   ) {}
 
   @Mutation(() => User)
@@ -33,7 +35,7 @@ export class AuthResolver {
     return this.userSerivce.create({ email, password: hashedPassword });
   }
 
-  @Mutation(() => JwtToken)
+  @Mutation(() => AccessToken)
   async login(
     @Args('input') { email, password }: LoginInput,
     @Context() context: any,
@@ -53,8 +55,32 @@ export class AuthResolver {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Mutation(() => JwtToken)
+  @Mutation(() => AccessToken)
   recoverAccessToken(@CurrentUser() { sub: id, email }: JwtPayload) {
     return this.authService.getAccessToken({ id, email });
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Mutation(() => Boolean)
+  async logout(@Context() context: any): Promise<boolean> {
+    const accessToken = context.req.headers.authorization.replace(
+      'Bearer ',
+      '',
+    );
+    const refreshToken = context.req.headers.cookie.replace('refresh=', '');
+
+    const verifiedToken = await this.authService.verify(
+      accessToken,
+      refreshToken,
+    );
+
+    await this.redisService.set<string>(`access:${accessToken}`, 'black', {
+      ttl: verifiedToken.access['exp'] - verifiedToken.access['iat'],
+    });
+    await this.redisService.set<string>(`refresh:${refreshToken}`, 'black', {
+      ttl: verifiedToken.refresh['exp'] - verifiedToken.refresh['iat'],
+    });
+
+    return true;
   }
 }
