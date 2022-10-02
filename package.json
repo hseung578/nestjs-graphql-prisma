@@ -10,7 +10,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "dotenv -e .env.dev -- nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,12 +19,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate:dev": "npx prisma migrate dev",
-    "migrate:dev:create": "npx prisma migrate dev --create-only",
-    "migrate:deploy": "npx prisma migrate deploy",
-    "prisma:generate": "npx prisma generate",
-    "prisma:studio": "npx prisma studio",
-    "prisma:seed": "npx prisma db seed"
+    "migrate:dev": "dotenv -e .env.dev -- npx prisma migrate dev",
+    "migrate:dev:create": "dotenv -e .env.dev -- npx prisma migrate dev --create-only",
+    "migrate:deploy": "dotenv -e .env.dev -- npx prisma migrate deploy",
+    "prisma:generate": "dotenv -e .env.dev -- npx prisma generate",
+    "prisma:studio": "dotenv -e .env.dev -- npx prisma studio",
+    "prisma:seed": "dotenv -e .env.dev -- npx prisma db seed"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
