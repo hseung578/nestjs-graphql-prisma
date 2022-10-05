@@ -63,6 +63,7 @@ type Mutation {
   createPost(input: CreatePostInput!): Post!
   updatePost(input: UpdatePostInput!): Boolean!
   deletePost(input: DeletePostInput!): Boolean!
+  count: Int!
   createComment(input: CreateCommentInput!): Comment!
   createReply(input: CreateReplyInput!): Comment!
   updateComment(input: UpdateCommentInput!): Boolean!
