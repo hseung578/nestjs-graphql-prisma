@@ -14,6 +14,7 @@ async function bootstrap() {
   const prismaService: PrismaService = app.get(PrismaService);
 
   app.use(cookieParser());
+  app.enableCors({ origin: true, credentials: true });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(

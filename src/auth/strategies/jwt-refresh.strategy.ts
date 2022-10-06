@@ -25,7 +25,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
 
   async validate(req: Request, payload: JwtPayload): Promise<JwtPayload> {
     const refreshToken = req.cookies.refresh;
-    console.log(refreshToken);
+
     const isLogout = await this.redisService.get(`refresh:${refreshToken}`);
 
     if (isLogout) throw new UnauthorizedException();

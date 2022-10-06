@@ -8,6 +8,10 @@ import { join } from 'path';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/common/graphql/schema.gql'),
+      cors: {
+        origin: true,
+        credentials: true,
+      },
       context: ({ req, res }) => ({ req, res }),
     }),
   ],
