@@ -15,6 +15,7 @@ export class PostsService {
   async findAll(): Promise<(Post & { author: User })[]> {
     return await this.prisma.post.findMany({
       include: { author: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

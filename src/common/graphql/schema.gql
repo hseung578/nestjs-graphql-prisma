@@ -47,8 +47,13 @@ type AccessToken {
 }
 
 type Query {
+  getPost(input: GetPostInput!): Post!
   getPosts: [Post!]!
   getComments(input: GetCommentInput!): [Comment!]!
+}
+
+input GetPostInput {
+  id: Int!
 }
 
 input GetCommentInput {
