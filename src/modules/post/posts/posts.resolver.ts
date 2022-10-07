@@ -5,7 +5,12 @@ import { CurrentUser } from '@auth/decorators';
 import { JwtPayload } from '@auth/interfaces';
 import { User } from '@modules/user/users/models';
 import { Post } from './models';
-import { CreatePostInput, DeletePostInput, UpdatePostInput } from './dtos';
+import {
+  CreatePostInput,
+  DeletePostInput,
+  GetPostInput,
+  UpdatePostInput,
+} from './dtos';
 import { PostsService } from './posts.service';
 import { PrismaService } from '@providers/prisma/prisma.service';
 
@@ -15,6 +20,11 @@ export class PostsResolver {
     private readonly postsService: PostsService,
     private readonly prisma: PrismaService,
   ) {}
+
+  @Query(() => Post)
+  getPost(@Args('input') input: GetPostInput): Promise<Post> {
+    return this.postsService.find(input.id);
+  }
 
   @Query(() => [Post])
   getPosts(): Promise<(Post & { author: User })[]> {

@@ -7,6 +7,11 @@ import { CreatePostInput, UpdatePostInput } from './dtos';
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async find(id: number): Promise<Post> {
+    return await this.prisma.post.findUnique({ where: { id } });
+  }
+
   async findAll(): Promise<(Post & { author: User })[]> {
     return await this.prisma.post.findMany({
       include: { author: true },
